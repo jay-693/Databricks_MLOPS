@@ -4,50 +4,65 @@ import mlflow
 from mlflow import MlflowClient
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.serving import ServedEntityInput
-from databricks.sdk.service.serving import AutoCaptureConfigInput
+
+# --------------------------------------------------
+# MLflow / Unity Catalog
+# --------------------------------------------------
 
 mlflow.set_registry_uri("databricks-uc")
 
-dbutils.widgets.text("catalog", "fraud_demo")
+# --------------------------------------------------
+# Parameters
+# --------------------------------------------------
 
+dbutils.widgets.text("catalog", "fraud_demo")
 catalog = dbutils.widgets.get("catalog")
 
-registered_model_name = f"{catalog}.models.fraud_detector"
+# --------------------------------------------------
+# Model and endpoint
+# --------------------------------------------------
 
-endpoint_name = "dev_vattikutivijay693_fraud-detector-endpoint"
+registered_model_name = f"{catalog}.models.fraud_detector"
+# no dev_<user>_ prefix — this only ever runs under prod
+endpoint_name = "fraud-detector-endpoint"
+
+# --------------------------------------------------
+# Get champion version
+# --------------------------------------------------
 
 client = MlflowClient()
-
 champion_mv = client.get_model_version_by_alias(
-    registered_model_name,
-    "champion"
-)
+    registered_model_name, "champion")
+champion_version = str(champion_mv.version)
 
-print(
-    f"Updating '{endpoint_name}' "
-    f"to serve champion version {champion_mv.version}"
-)
+print(f"Champion model version: {champion_version}")
+
+# --------------------------------------------------
+# Verify endpoint exists
+# --------------------------------------------------
 
 w = WorkspaceClient()
-
-# Verify endpoint exists
-endpoint = w.serving_endpoints.get(
-    name=endpoint_name
-)
+endpoint = w.serving_endpoints.get(name=endpoint_name)
 
 print(f"Endpoint found: {endpoint.name}")
+print(f"Endpoint ready state: {endpoint.state.ready}")
+print(f"Endpoint config update: {endpoint.state.config_update}")
 
-# Update endpoint to champion model version
+# --------------------------------------------------
+# Update endpoint — single served entity, 100% traffic (default with one entity)
+# --------------------------------------------------
+
 w.serving_endpoints.update_config(
     name=endpoint_name,
     served_entities=[
         ServedEntityInput(
             entity_name=registered_model_name,
-            entity_version=str(champion_mv.version),
+            entity_version=champion_version,
             scale_to_zero_enabled=True,
             workload_size="Small",
-        )
-    ]
+        ),
+    ],
 )
 
-print("Endpoint update submitted.")
+print(f"Endpoint '{endpoint_name}' update submitted.")
+print(f"Now serving champion version {champion_version} (100%).")
