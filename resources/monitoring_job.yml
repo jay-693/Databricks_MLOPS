@@ -1,0 +1,29 @@
+resources:
+  jobs:
+    fraud_monitoring_job:
+      name: fraud_monitoring_job
+      tasks:
+        - task_key: check_drift
+          notebook_task:
+            notebook_path: ../src/check_drift.py
+            base_parameters:
+              catalog: ${var.catalog}
+
+        - task_key: drift_gate
+          depends_on:
+            - task_key: check_drift
+          condition_task:
+            op: EQUAL_TO
+            left: "{{tasks.check_drift.values.drift_detected}}"
+            right: "true"
+
+        - task_key: trigger_retraining
+          depends_on:
+            - task_key: drift_gate
+              outcome: "true"
+          run_job_task:
+            job_id: ${resources.jobs.fraud_training_job.id}
+      schedule:
+        quartz_cron_expression: "0 0 7 * * ?" # 7am daily, after ingestion
+        timezone_id: "UTC"
+        pause_status: PAUSED

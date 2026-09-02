@@ -1,0 +1,64 @@
+# This is a Declarative Automation Bundle definition for fraud_mlops.
+
+bundle:
+  name: fraud_mlops
+  uuid: 4ca72c17-210b-4d0b-bfd7-1da6db12565a
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: "Catalog used by the fraud ML project"
+    default: "fraud_demo"
+
+  schema:
+    description: "Schema used by the fraud ML project"
+    default: "bronze"
+
+targets:
+  # =========================
+  # DEV
+  # =========================
+  dev:
+    mode: development
+    default: true
+
+    workspace:
+      host: https://dbc-74baa53f-4a06.cloud.databricks.com
+
+    variables:
+      catalog: fraud_demo
+      schema: bronze
+
+  # =========================
+  # TEST
+  # =========================
+  test:
+    mode: production
+
+    workspace:
+      host: https://dbc-74baa53f-4a06.cloud.databricks.com
+      root_path: /Workspace/Users/vattikutivijay693@gmail.com/.bundle/${bundle.name}/${bundle.target}
+
+    variables:
+      catalog: fraud_demo_test
+      schema: bronze
+
+  # =========================
+  # PROD
+  # =========================
+  prod:
+    mode: production
+
+    workspace:
+      host: https://dbc-74baa53f-4a06.cloud.databricks.com
+      root_path: /Workspace/Users/vattikutivijay693@gmail.com/.bundle/${bundle.name}/${bundle.target}
+
+    variables:
+      catalog: fraud_demo_prod
+      schema: prod
+
+    permissions:
+      - user_name: vattikutivijay693@gmail.com
+        level: CAN_MANAGE

@@ -1,0 +1,14 @@
+resources:
+  model_serving_endpoints:
+    fraud_detector_endpoint:
+      name: fraud_detector_endpoint
+      config:
+        served_entities:
+          - entity_name: ${var.catalog}.models.fraud_detector
+            entity_version: "1"
+            scale_to_zero_enabled: true
+            workload_size: Small
+        traffic_config:
+          routes:
+            - served_model_name: fraud_detector-1
+              traffic_percentage: 100

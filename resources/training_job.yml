@@ -1,0 +1,60 @@
+resources:
+  jobs:
+    fraud_training_job:
+      name: fraud_training_job
+      tasks:
+        - task_key: build_features
+          notebook_task:
+            notebook_path: ../src/features.py
+            base_parameters:
+              catalog: ${var.catalog}
+
+        - task_key: train_models
+          depends_on:
+            - task_key: build_features
+          notebook_task:
+            notebook_path: ../src/train.py
+            base_parameters:
+              catalog: ${var.catalog}
+
+        - task_key: evaluate_model
+          depends_on:
+            - task_key: train_models
+          notebook_task:
+            notebook_path: ../src/evaluate.py
+            base_parameters:
+              catalog: ${var.catalog}
+
+        - task_key: register_model
+          depends_on:
+            - task_key: evaluate_model
+          condition_task:
+            op: EQUAL_TO
+            left: "{{tasks.evaluate_model.values.eval_passed}}"
+            right: "true"
+
+        - task_key: register_model_run
+          depends_on:
+            - task_key: register_model
+              outcome: "true"
+          notebook_task:
+            notebook_path: ../src/register.py
+            base_parameters:
+              catalog: ${var.catalog}
+
+        - task_key: update_serving
+          depends_on:
+            - task_key: register_model_run
+          condition_task:
+            op: EQUAL_TO
+            left: "{{tasks.register_model_run.values.promoted}}"
+            right: "true"
+
+        - task_key: update_serving_run
+          depends_on:
+            - task_key: update_serving
+              outcome: "true"
+          notebook_task:
+            notebook_path: ../src/serve.py
+            base_parameters:
+              catalog: ${var.catalog}
