@@ -62,16 +62,16 @@ targets:
     permissions:
       - user_name: vattikutivijay693@gmail.com
         level: CAN_MANAGE
-    resources:
-      model_serving_endpoints:
-        fraud_detector_endpoint:
-          name: fraud-detector-endpoint
-          config:
-            served_entities:
-              - entity_name: fraud_demo_prod.models.fraud_detector
-                entity_version: "1"
-                scale_to_zero_enabled: true
-                workload_size: Small
-          tags:
-            - key: project
-              value: fraud_mlops
+    # resources:
+    #   model_serving_endpoints:
+    #     fraud_detector_endpoint:
+    #       name: fraud-detector-endpoint
+    #       config:
+    #         served_entities:
+    #           - entity_name: fraud_demo_prod.models.fraud_detector
+    #             entity_version: "1"
+    #             scale_to_zero_enabled: true
+    #             workload_size: Small
+    #       tags:
+    #         - key: project
+    #           value: fraud_mlops

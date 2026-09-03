@@ -58,3 +58,4 @@ resources:
             notebook_path: ../src/serve.py
             base_parameters:
               catalog: ${var.catalog}
+              target: ${bundle.target}

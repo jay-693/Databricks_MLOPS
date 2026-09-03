@@ -5,30 +5,25 @@ from mlflow import MlflowClient
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.serving import ServedEntityInput
 
-# --------------------------------------------------
-# MLflow / Unity Catalog
-# --------------------------------------------------
-
 mlflow.set_registry_uri("databricks-uc")
 
-# --------------------------------------------------
-# Parameters
-# --------------------------------------------------
-
 dbutils.widgets.text("catalog", "fraud_demo")
+dbutils.widgets.text("target", "dev")
+
 catalog = dbutils.widgets.get("catalog")
+target = dbutils.widgets.get("target")
 
 # --------------------------------------------------
-# Model and endpoint
+# Safety guard: this must never touch the prod endpoint
+# unless it's actually running as the prod target
 # --------------------------------------------------
+if target != "prod":
+    print(
+        f"Target is '{target}', not 'prod' — skipping serving endpoint update.")
+    dbutils.notebook.exit("skipped: not prod")
 
 registered_model_name = f"{catalog}.models.fraud_detector"
-# no dev_<user>_ prefix — this only ever runs under prod
 endpoint_name = "fraud-detector-endpoint"
-
-# --------------------------------------------------
-# Get champion version
-# --------------------------------------------------
 
 client = MlflowClient()
 champion_mv = client.get_model_version_by_alias(
@@ -37,20 +32,11 @@ champion_version = str(champion_mv.version)
 
 print(f"Champion model version: {champion_version}")
 
-# --------------------------------------------------
-# Verify endpoint exists
-# --------------------------------------------------
-
 w = WorkspaceClient()
 endpoint = w.serving_endpoints.get(name=endpoint_name)
 
 print(f"Endpoint found: {endpoint.name}")
 print(f"Endpoint ready state: {endpoint.state.ready}")
-print(f"Endpoint config update: {endpoint.state.config_update}")
-
-# --------------------------------------------------
-# Update endpoint — single served entity, 100% traffic (default with one entity)
-# --------------------------------------------------
 
 w.serving_endpoints.update_config(
     name=endpoint_name,
