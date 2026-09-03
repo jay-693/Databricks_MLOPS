@@ -57,7 +57,7 @@ targets:
 
     variables:
       catalog: fraud_demo_prod
-      schema: prod
+      schema: bronze
 
     permissions:
       - user_name: vattikutivijay693@gmail.com
