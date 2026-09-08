@@ -4,7 +4,7 @@ drift = spark.table(
     "fraud_demo.monitoring.fraud_detector_payload_drift_metrics")
 
 breached = (drift
-            .filter("window.start = current_date() - 1")
+            .filter("window.start = current_date()")
             .filter("column_name != ':table'")
             .filter("js_distance > 0.2")   # threshold you tune
             .count())
