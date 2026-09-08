@@ -53,7 +53,7 @@ except Exception:
 
 print(f"Challenger: v{mv.version}, avg_precision={new_metric:.4f}")
 
-promoted = new_metric > champion_metric
+promoted = new_metric >= champion_metric
 if promoted:
     client.set_registered_model_alias(
         registered_model_name, "champion", mv.version)
