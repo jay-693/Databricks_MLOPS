@@ -65,7 +65,8 @@ with mlflow.start_run(run_name="model_bakeoff") as parent_run:
                 "precision_at_80recall": precision_at_80recall,
             })
 
-    # pick the winner: rank by avg_precision (imbalance-aware), tie-break on precision_at_80recall
+    # pick the winner: rank by avg_precision (imbalance-aware),
+    # tie-break on precision_at_80recall
     best = sorted(
         results,
         key=lambda r: (r["avg_precision"], r["precision_at_80recall"]),
