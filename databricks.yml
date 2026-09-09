@@ -14,7 +14,10 @@ variables:
 
   schema:
     description: "Schema used by the fraud ML project"
-    default: "bronze
+    default: "bronze"
+  champion_version:
+    description: "Model version currently aliased as champion — update before each prod deploy"
+    default: "1"
 
 targets:
   # =========================
