@@ -12,8 +12,3 @@ resources:
             base_parameters:
               batch_id: "{{job.start_time.iso_date}}"
               catalog: ${var.catalog}
-
-      schedule:
-        quartz_cron_expression: "0 0 6 * * ?"
-        timezone_id: "UTC"
-        pause_status: PAUSED

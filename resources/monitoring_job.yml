@@ -31,7 +31,3 @@ resources:
               outcome: "true"
           run_job_task:
             job_id: ${resources.jobs.fraud_training_job.id}
-      schedule:
-        quartz_cron_expression: "0 0 7 * * ?" # 7am daily, after ingestion
-        timezone_id: "UTC"
-        pause_status: PAUSED

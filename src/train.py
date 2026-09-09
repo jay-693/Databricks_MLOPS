@@ -73,7 +73,7 @@ with mlflow.start_run(run_name="model_bakeoff") as parent_run:
         reverse=True,
     )[0]
 
-    mlflow.log_param("best_algorithm", best["algorithm"])
+mlflow.log_param("best_algorithm", best["algorithm"])
 mlflow.set_tag("best_run_id", best["run_id"])
 
 run_id = best["run_id"]
