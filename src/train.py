@@ -20,6 +20,24 @@ y = df["Class"]
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, stratify=y, random_state=42)
 
+# --------------------------------------------------
+# Search on a stratified SAMPLE of the training data —
+# hyperparameters that win on a good sample generalize fine,
+# and this is the single biggest lever for cutting search time.
+# --------------------------------------------------
+SEARCH_SAMPLE_SIZE = 40000
+if len(X_train) > SEARCH_SAMPLE_SIZE:
+    X_search, _, y_search, _ = train_test_split(
+        X_train, y_train,
+        train_size=SEARCH_SAMPLE_SIZE,
+        stratify=y_train,
+        random_state=42,
+    )
+else:
+    X_search, y_search = X_train, y_train
+
+print(f"Searching hyperparameters on {len(X_search)} rows (full train set: {len(X_train)})")
+
 with open("../conf/model_params.yml") as f:
     param_grids = yaml.safe_load(f)
 
@@ -35,20 +53,25 @@ with mlflow.start_run(run_name="model_bakeoff") as parent_run:
     for name, base_model in base_models.items():
         with mlflow.start_run(run_name=name, nested=True) as child_run:
 
+            # --- Step 1: cheap search on the sample ---
             search = RandomizedSearchCV(
                 estimator=base_model,
                 param_distributions=param_grids[name],
-                n_iter=8,
+                n_iter=4,          # down from 8
                 scoring="average_precision",
-                cv=3,
+                cv=2,              # down from 3
                 random_state=42,
                 n_jobs=-1,
             )
-            search.fit(X_train, y_train)
+            search.fit(X_search, y_search)
+            best_params = search.best_params_
+            print(f"{name} best params (from sample search): {best_params}")
 
-            best_model = search.best_estimator_
-            probs = best_model.predict_proba(X_test)[:, 1]
+            # --- Step 2: retrain that winning config on the FULL training set ---
+            final_model = base_model.__class__(**{**base_model.get_params(), **best_params})
+            final_model.fit(X_train, y_train)
 
+            probs = final_model.predict_proba(X_test)[:, 1]
             ap = average_precision_score(y_test, probs)
             auc = roc_auc_score(y_test, probs)
 
@@ -56,16 +79,15 @@ with mlflow.start_run(run_name="model_bakeoff") as parent_run:
             mask = recalls >= 0.80
             precision_at_80recall = precisions[mask].max() if mask.any() else 0.0
 
-            mlflow.log_params(search.best_params_)
+            mlflow.log_params(best_params)
             mlflow.log_metrics({
                 "avg_precision": ap,
                 "roc_auc": auc,
                 "precision_at_80recall": precision_at_80recall,
-                "cv_best_score": search.best_score_,
+                "cv_best_score_on_sample": search.best_score_,
             })
             mlflow.set_tag("algorithm", name)
-
-            print(f"{name} best params: {search.best_params_}")
+            mlflow.sklearn.log_model(final_model, "model")  # log the FULL-data model, not the sample-trained one
 
             results.append({
                 "algorithm": name,
