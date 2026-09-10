@@ -39,8 +39,8 @@ print(f"Precision @ 80% Recall: {precision_at_80recall}")
 
 # Example business threshold
 eval_passed = (
-    avg_precision >= 0.50
-    and precision_at_80recall >= 0.20
+    avg_precision >= 0.95
+    and precision_at_80recall >= 0.80
 )
 
 print(f"Evaluation passed: {eval_passed}")
