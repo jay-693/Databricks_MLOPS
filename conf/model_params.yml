@@ -4,11 +4,11 @@ logistic_regression:
   class_weight: ["balanced"]
 
 random_forest:
-  n_estimators: [100, 200]
+  n_estimators: [100, 200, 300]
   max_depth: [8, 12]
   class_weight: ["balanced"]
 
 gradient_boosting:
-  n_estimators: [100, 150]
+  n_estimators: [100, 150, 200]
   max_depth: [2, 3]
   learning_rate: [0.05, 0.1]
