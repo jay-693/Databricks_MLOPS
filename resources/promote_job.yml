@@ -1,0 +1,29 @@
+resources:
+  jobs:
+    fraud_promote_job:
+      name: fraud_promote_job
+      tasks:
+        - task_key: promote_model
+          notebook_task:
+            notebook_path: ../src/promote_model.py
+            base_parameters:
+              source_catalog: fraud_demo_test
+              target_catalog: ${var.catalog}
+
+        - task_key: update_serving
+          depends_on:
+            - task_key: promote_model
+          condition_task:
+            op: EQUAL_TO
+            left: "{{tasks.promote_model.values.promoted}}"
+            right: "true"
+
+        - task_key: update_serving_run
+          depends_on:
+            - task_key: update_serving
+              outcome: "true"
+          notebook_task:
+            notebook_path: ../src/serve.py
+            base_parameters:
+              catalog: ${var.catalog}
+              target: ${bundle.target}
