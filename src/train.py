@@ -24,7 +24,6 @@ mlflow.set_experiment(
     "/Workspace/Users/vattikutivijay693@gmail.com/fraud_mlops"
 )
 
-# Don't let autologging create the model artifact.
 # We will log it explicitly with a signature.
 mlflow.autolog(log_models=False)
 
