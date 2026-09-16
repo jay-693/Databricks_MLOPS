@@ -44,14 +44,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: databricks/setup-cli@main
-      - run: databricks bundle deploy -t prod
+
+      - name: Get current champion version
+        id: champion
+        run: |
+          VERSION=$(databricks model-versions get-by-alias fraud_demo_prod.models.fraud_detector champion -o json 2>/dev/null | python3 -c "import sys, json; print(json.load(sys.stdin)['version'])" 2>/dev/null || echo "1")
+          echo "Current champion version: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
+      - run: databricks bundle deploy -t prod --var="champion_version=${{ steps.champion.outputs.version }}"
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
       - run: databricks bundle run fraud_ingestion_job -t prod
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
       - run: databricks bundle run fraud_promote_job -t prod
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
