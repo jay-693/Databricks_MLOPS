@@ -27,7 +27,7 @@ print(f"Source champion: {source_model_name} v{source_champion.version} "
       f"(avg_precision={source_metric})")
 
 # --------------------------------------------------
-# Copy the model version across catalogs (no retraining)
+# Copy the model version across catalogs
 # --------------------------------------------------
 src_uri = f"models:/{source_model_name}/{source_champion.version}"
 

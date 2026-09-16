@@ -5,7 +5,7 @@ from pyspark.sql import functions as F
 
 mlflow.set_registry_uri("databricks-uc")
 
-dbutils.widgets.text("catalog", "fraud_demo_prod")
+dbutils.widgets.text("catalog", "fraud_demo_test")
 dbutils.widgets.text("batch_id", "manual")
 catalog = dbutils.widgets.get("catalog")
 batch_id = dbutils.widgets.get("batch_id")
