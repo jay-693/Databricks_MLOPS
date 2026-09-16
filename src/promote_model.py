@@ -52,7 +52,7 @@ except Exception:
     prod_metric = -1
     print("No existing prod champion found — this will become champion by default.")
 
-promoted = source_metric is not None and source_metric > (prod_metric or -1)
+promoted = source_metric is not None and source_metric >= (prod_metric or -1)
 
 if promoted:
     client.set_registered_model_alias(
