@@ -1,7 +1,7 @@
 # Databricks notebook source
 # src/monitoring/check_drift.py
 
-dbutils.widgets.text("catalog", "fraud_demo_prod")
+dbutils.widgets.text("catalog", "fraud_demo_test")
 catalog = dbutils.widgets.get("catalog")
 
 drift = spark.table(

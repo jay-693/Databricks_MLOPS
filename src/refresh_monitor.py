@@ -3,8 +3,10 @@ from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.catalog import MonitorRefreshInfoState
 import time
 
+dbutils.widgets.removeAll()
 dbutils.widgets.text("catalog", "fraud_demo_test")
 catalog = dbutils.widgets.get("catalog")
+print(f"Refreshing monitor for catalog: {catalog}")
 
 table_name = f"{catalog}.serving.fraud_detector_payload"
 
@@ -21,7 +23,7 @@ TERMINAL_STATES = (
     MonitorRefreshInfoState.CANCELED,
 )
 
-max_wait_seconds = 600
+max_wait_seconds = 1800
 waited = 0
 status = None
 while waited < max_wait_seconds:
