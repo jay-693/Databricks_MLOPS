@@ -6,10 +6,6 @@ on:
   push:
     branches: [master]
 
-env:
-  DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-  DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
-
 jobs:
   validate-dev:
     if: github.event_name == 'pull_request'
@@ -18,6 +14,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: databricks/setup-cli@main
       - run: databricks bundle validate -t dev
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
 
   deploy-test:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -26,8 +25,17 @@ jobs:
       - uses: actions/checkout@v4
       - uses: databricks/setup-cli@main
       - run: databricks bundle deploy -t test
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
       - run: databricks bundle run fraud_ingestion_job -t test
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
       - run: databricks bundle run fraud_training_job -t test
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
 
   deploy-prod:
     needs: deploy-test
@@ -37,5 +45,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: databricks/setup-cli@main
       - run: databricks bundle deploy -t prod
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
       - run: databricks bundle run fraud_ingestion_job -t prod
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
       - run: databricks bundle run fraud_promote_job -t prod
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
