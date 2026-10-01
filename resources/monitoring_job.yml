@@ -3,15 +3,7 @@ resources:
     fraud_monitoring_job:
       name: fraud_monitoring_job
       tasks:
-        - task_key: score_and_log
-          notebook_task:
-            notebook_path: ../src/score_and_log.py
-            base_parameters:
-              catalog: ${var.catalog}
-
         - task_key: refresh_monitor
-          depends_on:
-            - task_key: score_and_log
           notebook_task:
             notebook_path: ../src/refresh_monitor.py
             base_parameters:
