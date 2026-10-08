@@ -16,7 +16,7 @@ w.quality_monitors.create(
     inference_log=MonitorInferenceLog(
         problem_type=MonitorInferenceLogProblemType.PROBLEM_TYPE_CLASSIFICATION,
         prediction_col="prediction",
-        label_col="Class",
+        label_col="isFraud",
         model_id_col="model_version",
         timestamp_col="request_ts",
         granularities=["1 day"],

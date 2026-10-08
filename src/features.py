@@ -11,17 +11,15 @@ dbutils.widgets.text("catalog", "fraud_demo")
 
 catalog = dbutils.widgets.get("catalog")
 
-bronze = spark.table(f"{catalog}.bronze.transactions")
+bronze = spark.table(f"{catalog}.bronze.creditcardtransactions")
 
 features = (bronze
-            .select("Time", "Amount", *[f"V{i}" for i in range(1, 29)], "Class")
-            .withColumn("amount_log", F.log1p("Amount"))
-            .withColumn("hour_of_day", (F.col("Time") % 86400) / 3600)
+            .select("*")
             .withColumn("txn_id", F.monotonically_increasing_id())
             )
 
 fe.create_table(
-    name=f"{catalog}.silver.txn_features",
+    name=f"{catalog}.silver.fraud_features",
     primary_keys=["txn_id"],
     df=features,
     description="Engineered features for fraud model"
