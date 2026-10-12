@@ -18,7 +18,7 @@ model_uri = f"models:/{registered_model_name}@champion"
 model = mlflow.pyfunc.spark_udf(spark, model_uri=model_uri, result_type="int")
 
 df = spark.table(f"{catalog}.silver.txn_features")
-NON_FEATURE_COLS = ["Class", "txn_id", "ingest_ts", "batch_id"]
+NON_FEATURE_COLS = ["isFraud", "txn_id", "ingest_ts", "batch_id"]
 feature_cols = [c for c in df.columns if c not in NON_FEATURE_COLS]
 
 sample = df.limit(20000)
@@ -30,7 +30,7 @@ baseline = (sample
             .withColumn("prediction", model(*[F.col(c) for c in feature_cols]))
             .withColumn("request_ts", F.date_sub(F.current_timestamp(), 1))
             .withColumn("model_version", F.lit(model_version))
-            .select(*feature_cols, "Class", "prediction", "request_ts", "model_version"))
+            .select(*feature_cols, "isFraud", "prediction", "request_ts", "model_version"))
 
 # --------------------------------------------------
 # DRIFTED window ("today") — deliberately shifted Amount + V14
@@ -39,15 +39,11 @@ baseline = (sample
 # --------------------------------------------------
 drifted = (sample
            # amounts now much larger
-           .withColumn("Amount", F.col("Amount") * 8 + 200)
-           # keep engineered feature consistent
-           .withColumn("amount_log", F.log1p(F.col("Amount")))
-           # shift a key PCA feature hard
-           .withColumn("V14", F.col("V14") + 15.0)
+           .withColumn("log_amount", F.col("log_amount") * 3)
            .withColumn("prediction", model(*[F.col(c) for c in feature_cols]))
            .withColumn("request_ts", F.current_timestamp())
            .withColumn("model_version", F.lit(model_version))
-           .select(*feature_cols, "Class", "prediction", "request_ts", "model_version"))
+           .select(*feature_cols, "isFraud", "prediction", "request_ts", "model_version"))
 
 (baseline.write.mode("append").saveAsTable(
     f"{catalog}.serving.fraud_detector_payload"))

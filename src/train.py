@@ -100,49 +100,24 @@ assert 0.0 < VAL_FRACTION < 0.5, "val_fraction must be between 0 and 0.5"
 # --------------------------------------------------
 # Load data
 # --------------------------------------------------
+train_df = spark.table(f"{catalog}.silver.fraud_features").toPandas()
+test_df = spark.table(f"{catalog}.silver.fraud_features_test").toPandas()
 
-df = spark.table(
-    f"{catalog}.silver.fraud_features"
-).toPandas()
+NON_FEATURE_COLS = ["isFraud", "txn_id", "ingest_ts", "batch_id"]
 
-NON_FEATURE_COLS = [
-    "isFraud",
-    "txn_id",
-    "ingest_ts",
-    "batch_id"
-]
+feature_cols = [c for c in train_df.columns if c not in NON_FEATURE_COLS]
 
-feature_cols = [
-    c for c in df.columns
-    if c not in NON_FEATURE_COLS
-]
+missing = set(feature_cols) - set(test_df.columns)
+assert not missing, f"Test table is missing feature columns: {missing}"
 
-X = df[feature_cols]
-y = df["isFraud"]
-
-n_null_cells = int(X.isna().sum().sum())
-if n_null_cells:
-    print(f"WARNING: {n_null_cells} null cells in the feature table")
-
-print(
-    f"Rows: {len(X):,} | features: {len(feature_cols)} | "
-    f"frauds: {int(y.sum()):,} ({100 * y.mean():.4f}%)"
-)
-
+X_trainval, y_trainval = train_df[feature_cols], train_df["isFraud"]
+X_test,     y_test = test_df[feature_cols],  test_df["isFraud"]
 # --------------------------------------------------
 # Splits
 #   test  : final, untouched evaluation
 #   val   : chooses the decision threshold and the winning algorithm
 #   fit   : trains the models (the search sample is drawn from here)
 # --------------------------------------------------
-
-X_trainval, X_test, y_trainval, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.2,
-    stratify=y,
-    random_state=42
-)
 
 X_fit, X_val, y_fit, y_val = train_test_split(
     X_trainval,

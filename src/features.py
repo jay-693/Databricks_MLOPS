@@ -11,16 +11,17 @@ dbutils.widgets.text("catalog", "fraud_demo")
 
 catalog = dbutils.widgets.get("catalog")
 
-bronze = spark.table(f"{catalog}.bronze.creditcardtransactions")
+sources = {
+    "fraud_features":      f"{catalog}.bronze.creditcardtransactions",
+    "fraud_features_test": f"{catalog}.bronze.creditcardtransactions_test",
+}
 
-features = (bronze
-            .select("*")
-            .withColumn("txn_id", F.monotonically_increasing_id())
-            )
-
-fe.create_table(
-    name=f"{catalog}.silver.fraud_features",
-    primary_keys=["txn_id"],
-    df=features,
-    description="Engineered features for fraud model"
-)
+for target, source in sources.items():
+    df = spark.table(source).withColumn(
+        "txn_id", F.monotonically_increasing_id())
+    fe.create_table(
+        name=f"{catalog}.silver.{target}",
+        primary_keys=["txn_id"],
+        df=df,
+        description=f"Engineered features for fraud model ({target})",
+    )
