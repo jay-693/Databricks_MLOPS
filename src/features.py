@@ -7,7 +7,7 @@ from databricks.feature_engineering import FeatureEngineeringClient
 
 fe = FeatureEngineeringClient()
 
-dbutils.widgets.text("catalog", "fraud_demo")
+dbutils.widgets.text("catalog", "fraud_demo_test")
 
 catalog = dbutils.widgets.get("catalog")
 
