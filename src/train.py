@@ -210,7 +210,7 @@ def search_space(model, grid):
 
 
 # --------------------------------------------------
-# Metric helpers
+# Metric helper
 # --------------------------------------------------
 
 def precision_at_recall(y_true, probs, min_recall):
