@@ -44,7 +44,7 @@ mlflow.autolog(log_models=False)
 dbutils.widgets.text("catalog", "fraud_demo")
 
 # Recall the decision threshold is tuned to reach (on the validation slice)
-dbutils.widgets.text("target_recall", "0.63")
+dbutils.widgets.text("target_recall", "0.60")
 
 # How the winning algorithm is chosen (measured on the validation slice):
 #   avg_precision | precision_at_80recall | precision_at_target_recall
@@ -63,7 +63,7 @@ dbutils.widgets.text("search_n_iter", "8")
 dbutils.widgets.text("search_cv", "3")
 
 # Share of the training rows held out to choose the threshold / the winner
-dbutils.widgets.text("val_fraction", "0.10")
+dbutils.widgets.text("val_fraction", "0.12")
 
 # Warn when the chosen threshold would raise more than this many alerts per true fraud
 # (a target_recall set beyond the knee of the precision-recall curve flags huge volumes)
@@ -181,10 +181,10 @@ MODEL_FACTORIES = {
             random_state=42
         ),
 
-    "gradient_boosting":
-        lambda: GradientBoostingClassifier(
-            random_state=42
-        ),
+    # "gradient_boosting":
+    #     lambda: GradientBoostingClassifier(
+    #         random_state=42
+    #     ),
 
     # fast on millions of rows; class_weight needs scikit-learn >= 1.2
     "hist_gradient_boosting":
