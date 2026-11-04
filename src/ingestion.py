@@ -27,7 +27,7 @@ df = (
     .withColumn("batch_id", F.lit(batch_id))
 )
 
-table_name = f"{catalog}.bronze.creditcardtransactions"
+table_name = f"{catalog}.bronze.creditcarddata"
 
 if spark.catalog.tableExists(table_name):
     target = DeltaTable.forName(spark, table_name)
