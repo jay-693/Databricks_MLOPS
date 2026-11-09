@@ -13,7 +13,7 @@ raw = (
     spark.read
     .option("header", True)
     .option("inferSchema", True)
-    .csv(f"/Volumes/{catalog}/bronze/raw_data/creditcarddata.csv")
+    .csv(f"/Volumes/{catalog}/bronze/raw_data/mobilemoneytransactions.csv")
 )
 
 # No natural primary key in this dataset, so derive a deterministic
@@ -27,7 +27,7 @@ df = (
     .withColumn("batch_id", F.lit(batch_id))
 )
 
-table_name = f"{catalog}.bronze.creditcarddata"
+table_name = f"{catalog}.bronze.mobilemoneydata"
 
 if spark.catalog.tableExists(table_name):
     target = DeltaTable.forName(spark, table_name)

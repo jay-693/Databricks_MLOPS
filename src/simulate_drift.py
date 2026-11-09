@@ -17,7 +17,7 @@ model_version = str(champion_mv.version)
 model_uri = f"models:/{registered_model_name}@champion"
 model = mlflow.pyfunc.spark_udf(spark, model_uri=model_uri, result_type="int")
 
-df = spark.table(f"{catalog}.silver.txn_features")
+df = spark.table(f"{catalog}.silver.mobilemoneyFeatures_train")
 NON_FEATURE_COLS = ["isFraud", "txn_id", "ingest_ts", "batch_id"]
 feature_cols = [c for c in df.columns if c not in NON_FEATURE_COLS]
 

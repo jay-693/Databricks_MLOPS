@@ -14,7 +14,7 @@ dbutils.widgets.text("catalog", "fraud_demo_test")
 
 catalog = dbutils.widgets.get("catalog")
 
-df_raw = spark.table(f"{catalog}.bronze.creditcarddata")
+df_raw = spark.table(f"{catalog}.bronze.mobilemoneydata")
 print("Rows:", df_raw.count())
 print("Columns:", len(df_raw.columns))
 print(df_raw.columns)
@@ -242,8 +242,8 @@ pipeline_model = pipeline.fit(train_df)
 final_train_df = pipeline_model.transform(train_df)
 final_test_df = pipeline_model.transform(test_df)
 
-train_table = "fraud_demo.bronze.creditcardtransactions"
-test_table = "fraud_demo.bronze.creditcardtransactions_test"
+train_table = "fraud_demo.bronze.mobilemoneydata_train"
+test_table = "fraud_demo.bronze.mobilemoneydata_test"
 
 # Same columns, same order, for both periods.
 output_cols = [*numeric_feature_cols, label_col, *one_hot_cols]
@@ -285,8 +285,8 @@ for name in (train_table, test_table):
     print(f"{name}: {total:,} rows | {frauds:,} frauds ({100 * frauds / total:.4f}%) | {len(t.columns)} columns")
 
 sources = {
-    "fraud_features":      f"{catalog}.bronze.creditcardtransactions",
-    "fraud_features_test": f"{catalog}.bronze.creditcardtransactions_test",
+    "mobilemoneyFeatures_train":      f"{catalog}.bronze.mobilemoneydata_train",
+    "mobilemoneyFeatures_test":  f"{catalog}.bronze.mobilemoneydata_test",
 }
 
 for target, source in sources.items():

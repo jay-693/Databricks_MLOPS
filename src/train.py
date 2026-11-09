@@ -100,8 +100,9 @@ assert 0.0 < VAL_FRACTION < 0.5, "val_fraction must be between 0 and 0.5"
 # --------------------------------------------------
 # Load data
 # --------------------------------------------------
-train_df = spark.table(f"{catalog}.silver.fraud_features").toPandas()
-test_df = spark.table(f"{catalog}.silver.fraud_features_test").toPandas()
+train_df = spark.table(
+    f"{catalog}.silver.mobilemoneyFeatures_train").toPandas()
+test_df = spark.table(f"{catalog}.silver.mobilemoneyFeatures_test").toPandas()
 
 NON_FEATURE_COLS = ["isFraud", "txn_id", "ingest_ts", "batch_id"]
 
