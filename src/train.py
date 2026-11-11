@@ -12,7 +12,6 @@ from mlflow.models import infer_signature
 from sklearn.base import clone
 from sklearn.ensemble import (
     RandomForestClassifier,
-    GradientBoostingClassifier,
     HistGradientBoostingClassifier,
 )
 from sklearn.linear_model import LogisticRegression
@@ -63,7 +62,7 @@ dbutils.widgets.text("search_n_iter", "8")
 dbutils.widgets.text("search_cv", "3")
 
 # Share of the training rows held out to choose the threshold / the winner
-dbutils.widgets.text("val_fraction", "0.24")
+dbutils.widgets.text("val_fraction", "0.12")
 
 # Warn when the chosen threshold would raise more than this many alerts per true fraud
 # (a target_recall set beyond the knee of the precision-recall curve flags huge volumes)
@@ -113,6 +112,7 @@ assert not missing, f"Test table is missing feature columns: {missing}"
 
 X_trainval, y_trainval = train_df[feature_cols], train_df["isFraud"]
 X_test,     y_test = test_df[feature_cols],  test_df["isFraud"]
+
 # --------------------------------------------------
 # Splits
 #   test  : final, untouched evaluation

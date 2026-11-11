@@ -33,7 +33,7 @@ baseline = (sample
             .select(*feature_cols, "isFraud", "prediction", "request_ts", "model_version"))
 
 # --------------------------------------------------
-# DRIFTED window ("today") — deliberately shifted Amount + V14
+# DRIFTED window ("today") — deliberately shifted Amount
 # This is the synthetic drift injection: real transactions now
 # look artificially larger and shifted in a key PCA component.
 # --------------------------------------------------
